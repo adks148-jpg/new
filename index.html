@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Microsoft Teams</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-dark">
+
+  <!-- Toast Notification Container for OTP & Alerts -->
+  <div id="toast-container"></div>
+
+  <!-- =========================================================================
+       1. AUTHENTICATION CONTAINER (Sign In & Sign Up with OTP & Password Flow)
+       ========================================================================= -->
+  <div id="auth-view" class="auth-wrapper">
+    <div class="auth-container">
+      
+      <!-- Brand Logo Header -->
+      <div class="auth-logo-row">
+        <div class="auth-logo-badge">
+          <!-- Microsoft Teams SVG Icon -->
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+            <path d="M19.5 7.5C20.8807 7.5 22 8.61929 22 10V16C22 17.3807 20.8807 18.5 19.5 18.5C18.1193 18.5 17 17.3807 17 16V10C17 8.61929 18.1193 7.5 19.5 7.5Z" fill="#7B83EB"/>
+            <path d="M14.5 5.5C16.433 5.5 18 7.067 18 9V17C18 18.933 16.433 20.5 14.5 20.5H9.5C7.567 20.5 6 18.933 6 17V9C6 7.067 7.567 5.5 9.5 5.5H14.5Z" fill="#5B5FC7"/>
+            <circle cx="19.5" cy="5" r="2" fill="#7B83EB"/>
+            <circle cx="12" cy="3" r="2.5" fill="#FFFFFF"/>
+            <path d="M8 9H16V11H13V17H11V11H8V9Z" fill="#FFFFFF"/>
+          </svg>
+        </div>
+        <h1 class="auth-brand-name">Microsoft Teams</h1>
+      </div>
+
+      <!-- User Requirement Notice -->
+      <div class="auth-flow-info">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0; margin-top: 1px;">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="16" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+        <div>
+          <strong>Registration & Password Flow:</strong> Sign up with mobile & email and verify with an OTP. Once you create your password, <strong>no OTP is needed</strong> — log in directly with your password!
+        </div>
+      </div>
+
+      <!-- Auth Mode Tabs (Sign In vs Sign Up) -->
+      <div class="auth-tabs">
+        <button id="tab-btn-signin" class="auth-tab-btn active" onclick="switchAuthTab('signin')">
+          Sign In (Password Only)
+        </button>
+        <button id="tab-btn-signup" class="auth-tab-btn" onclick="switchAuthTab('signup')">
+          Sign Up (Mobile/Email OTP)
+        </button>
+      </div>
+
+      <!-- =====================================================================
+           A. SIGN IN VIEW (DIRECT PASSWORD LOGIN - NO OTP NEEDED!)
+           ===================================================================== -->
+      <div id="signin-section">
+        <form id="signin-form" onsubmit="handleDirectLogin(event)">
+          
+          <div class="form-group">
+            <label class="form-label">Email Address or Mobile Number</label>
+            <div class="input-with-icon">
+              <span class="input-icon-left">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              </span>
+              <input 
+                type="text" 
+                id="login-identifier" 
+                class="form-input" 
+                placeholder="e.g. satya@contoso.com or +1 555-0199" 
+                required 
+                value="satya@contoso.com"
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <label class="form-label" style="margin-bottom: 0;">Password</label>
+              <a href="javascript:void(0)" onclick="openForgotPasswordModal()" style="font-size: 12px; color: var(--teams-purple-light); text-decoration: none;">Forgot password?</a>
+            </div>
+            <div class="input-with-icon">
+              <span class="input-icon-left">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+              </span>
+              <input 
+                type="password" 
+                id="login-password" 
+                class="form-input" 
+                placeholder="Enter your password" 
+                required 
+                value="Password123!"
+              />
+              <button type="button" class="toggle-pw-btn" onclick="togglePasswordVisibility('login-password')">
+                👁️
+              </button>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; font-size: 13px;">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--text-secondary);">
+              <input type="checkbox" id="remember-me" checked style="accent-color: var(--teams-purple);">
+              Stay signed in
+            </label>
+            <span style="color: #4CAF50; font-size: 12px; display: flex; align-items: center; gap: 4px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              No OTP Required
+            </span>
+          </div>
+
+          <button type="submit" id="btn-login-submit" class="btn-teams-primary">
+            <span>Sign In to Teams</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+        </form>
+
+        <!-- Quick 1-Click Demo Login -->
+        <div class="demo-account-box">
+          <div class="demo-account-title">
+            <span>⚡ Quick Demo Account</span>
+            <span style="color: var(--teams-purple-light); font-weight: 600;">Pre-configured</span>
+          </div>
+          <div>Satya Nadella: <code>satya@contoso.com</code> / <code>Password123!</code></div>
+          <button type="button" class="btn-teams-secondary" onclick="handleQuickDemoLogin()">
+            🚀 1-Click Instant Demo Login
+          </button>
+        </div>
+
+      </div>
+
+      <!-- =====================================================================
+           B. SIGN UP VIEW (MOBILE + EMAIL -> OTP -> CREATE PASSWORD)
+           ===================================================================== -->
+      <div id="signup-section" class="hidden">
+        
+        <!-- Step Indicator -->
+        <div class="step-indicator">
+          <div id="step-dot-1" class="step-dot-wrap active">
+            <div class="step-dot">1</div>
+            <span class="step-label">Mobile & Email</span>
+          </div>
+          <div id="step-dot-2" class="step-dot-wrap">
+            <div class="step-dot">2</div>
+            <span class="step-label">Verify OTP</span>
+          </div>
+          <div id="step-dot-3" class="step-dot-wrap">
+            <div class="step-dot">3</div>
+            <span class="step-label">Create Password</span>
+          </div>
+        </div>
+
+        <!-- STEP 1: Enter Name, Mobile Number, and Email ID -->
+        <div id="signup-step-1">
+          <form onsubmit="handleSendOtp(event)">
+            
+            <div class="form-group">
+              <label class="form-label">Full Name</label>
+              <div class="input-with-icon">
+                <span class="input-icon-left">👤</span>
+                <input type="text" id="reg-name" class="form-input" placeholder="e.g. John Doe" required />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Mobile Number</label>
+              <div class="input-with-icon">
+                <span class="input-icon-left">📱</span>
+                <input type="tel" id="reg-mobile" class="form-input" placeholder="e.g. +1 555-0199 or +91 9876543210" required />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Work or Personal Email ID</label>
+              <div class="input-with-icon">
+                <span class="input-icon-left">✉️</span>
+                <input type="email" id="reg-email" class="form-input" placeholder="e.g. john.doe@contoso.com" required />
+              </div>
+            </div>
+
+            <button type="submit" id="btn-send-otp" class="btn-teams-primary">
+              <span>Send One-Time Password (OTP)</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+            </button>
+          </form>
+        </div>
+
+        <!-- STEP 2: Enter 6-digit OTP -->
+        <div id="signup-step-2" class="hidden">
+          <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">
+            We sent a 6-digit verification code to:
+          </p>
+          <div style="font-size: 13px; font-weight: 600; color: #FFFFFF; margin-bottom: 16px;">
+            <span id="display-reg-mobile"></span> &bull; <span id="display-reg-email"></span>
+          </div>
+
+          <!-- 6 Individual Digit Inputs -->
+          <div class="otp-inputs-grid">
+            <input type="text" maxlength="1" class="otp-box" id="otp-1" autofocus onkeyup="handleOtpInput(event, 1)" />
+            <input type="text" maxlength="1" class="otp-box" id="otp-2" onkeyup="handleOtpInput(event, 2)" />
+            <input type="text" maxlength="1" class="otp-box" id="otp-3" onkeyup="handleOtpInput(event, 3)" />
+            <input type="text" maxlength="1" class="otp-box" id="otp-4" onkeyup="handleOtpInput(event, 4)" />
+            <input type="text" maxlength="1" class="otp-box" id="otp-5" onkeyup="handleOtpInput(event, 5)" />
+            <input type="text" maxlength="1" class="otp-box" id="otp-6" onkeyup="handleOtpInput(event, 6)" />
+          </div>
+
+          <div class="otp-actions-bar">
+            <span>Didn't receive code?</span>
+            <button type="button" id="btn-resend-otp" class="resend-btn" onclick="resendOtp()">
+              Resend OTP (<span id="resend-countdown">30</span>s)
+            </button>
+          </div>
+
+          <button type="button" id="btn-auto-fill-otp" class="btn-teams-secondary" style="margin-bottom: 14px;" onclick="autoFillLatestOtp()">
+            ⚡ Auto-Fill Received OTP (<span id="auto-otp-badge"></span>)
+          </button>
+
+          <button type="button" id="btn-verify-otp" class="btn-teams-primary" onclick="handleVerifyOtp()">
+            <span>Verify OTP & Continue</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </button>
+
+          <button type="button" class="btn-teams-secondary" onclick="backToStep(1)">
+            &larr; Change Mobile or Email
+          </button>
+        </div>
+
+        <!-- STEP 3: Create Permanent Password (After this, NO OTP NEEDED!) -->
+        <div id="signup-step-3" class="hidden">
+          <div style="background: rgba(16, 124, 65, 0.15); border: 1px solid rgba(16, 124, 65, 0.4); border-radius: var(--radius-md); padding: 10px 12px; margin-bottom: 16px; font-size: 13px; color: #7FE8A4; display: flex; align-items: center; gap: 8px;">
+            <span>✅</span>
+            <span><strong>OTP Verified!</strong> Now set your permanent password.</span>
+          </div>
+
+          <form onsubmit="handleCreatePassword(event)">
+            
+            <div class="form-group">
+              <label class="form-label">Create Your Password</label>
+              <div class="input-with-icon">
+                <span class="input-icon-left">🔒</span>
+                <input 
+                  type="password" 
+                  id="reg-password" 
+                  class="form-input" 
+                  placeholder="At least 6 characters" 
+                  required 
+                  onkeyup="checkPasswordStrength(this.value)"
+                />
+                <button type="button" class="toggle-pw-btn" onclick="togglePasswordVisibility('reg-password')">
+                  👁️
+                </button>
+              </div>
+              <div class="pw-strength-bar">
+                <div id="pw-strength-meter" class="pw-strength-fill"></div>
+              </div>
+              <div id="pw-strength-label" class="pw-strength-text">Password strength: None</div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Confirm Password</label>
+              <div class="input-with-icon">
+                <span class="input-icon-left">🔒</span>
+                <input 
+                  type="password" 
+                  id="reg-password-confirm" 
+                  class="form-input" 
+                  placeholder="Re-enter password" 
+                  required 
+                />
+              </div>
+            </div>
+
+            <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.4;">
+              ✨ <strong>Next Time Sign In:</strong> You will only need your Email/Mobile and this Password. <strong>No OTP will be requested!</strong>
+            </div>
+
+            <button type="submit" id="btn-save-password" class="btn-teams-primary">
+              <span>Create Password & Enter Teams</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                <polyline points="10 17 15 12 10 7"></polyline>
+                <line x1="15" y1="12" x2="3" y2="12"></line>
+              </svg>
+            </button>
+          </form>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       2. MAIN TEAMS APPLICATION VIEW (UNLOCKED AFTER PASSWORD LOGIN / SIGNUP)
+       ========================================================================= -->
+  <div id="teams-app-view" class="hidden">
+    
+    <!-- Top Navigation Header -->
+    <header class="teams-top-header">
+      <div class="top-header-left">
+        <!-- Teams Brand Icon -->
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width: 28px; height: 28px; background: var(--teams-purple); border-radius: 6px; display: flex; align-items: center; justify-content: center;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="#FFFFFF">
+              <path d="M14.5 5.5C16.433 5.5 18 7.067 18 9V17C18 18.933 16.433 20.5 14.5 20.5H9.5C7.567 20.5 6 18.933 6 17V9C6 7.067 7.567 5.5 9.5 5.5H14.5Z"/>
+              <path d="M8 9H16V11H13V17H11V11H8V9Z" fill="#1F1F1F"/>
+            </svg>
+          </div>
+          <span style="font-weight: 700; font-size: 15px;">Teams</span>
+        </div>
+
+        <!-- Org Selector -->
+        <div class="org-selector" title="Switch Organization">
+          <span>Contoso Global &bull; Engineering</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Center Search Bar -->
+      <div class="search-bar-wrap">
+        <span class="search-icon-pos">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </span>
+        <input 
+          type="text" 
+          id="global-search-input" 
+          class="top-search-input" 
+          placeholder="Search messages, channels, or colleagues..." 
+          onkeyup="handleGlobalSearch(event)"
+        />
+      </div>
+
+      <!-- Right Header Actions & User Profile -->
+      <div class="top-header-right">
+        <!-- Meet Now Button -->
+        <button class="call-action-btn" onclick="startInstantMeeting()" title="Start an instant Teams meeting">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="23 7 16 12 23 17 23 7"></polygon>
+            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+          </svg>
+          <span>Meet Now</span>
+        </button>
+
+        <!-- New Chat Button -->
+        <button class="icon-btn" onclick="switchRailTab('chat')" title="New Chat">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 20h9"></path>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+          </svg>
+        </button>
+
+        <!-- Theme Toggle -->
+        <button class="icon-btn" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+          🌓
+        </button>
+
+        <!-- User Profile Avatar with Live Status Dot -->
+        <div class="avatar-status-wrap" onclick="openProfileModal()" title="View Profile & Sign Out">
+          <img id="header-user-avatar" src="" alt="User Avatar" class="user-avatar" />
+          <div id="header-status-badge" class="status-badge status-available"></div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Body Layout: Rail + Sidebar + Chat Workspace -->
+    <div class="teams-body-layout">
+      
+      <!-- 1. Leftmost App Rail (Activity, Chat, Teams, Calendar, Calls, Files) -->
+      <aside class="teams-app-rail">
+        <div class="rail-top">
+          <!-- Activity -->
+          <button class="rail-item" id="rail-btn-activity" onclick="switchRailTab('activity')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            <span class="rail-label">Activity</span>
+            <span class="rail-badge">3</span>
+          </button>
+
+          <!-- Chat -->
+          <button class="rail-item" id="rail-btn-chat" onclick="switchRailTab('chat')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span class="rail-label">Chat</span>
+            <span class="rail-badge">2</span>
+          </button>
+
+          <!-- Teams (Active by default) -->
+          <button class="rail-item active" id="rail-btn-teams" onclick="switchRailTab('teams')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            <span class="rail-label">Teams</span>
+          </button>
+
+          <!-- Calendar -->
+          <button class="rail-item" id="rail-btn-calendar" onclick="switchRailTab('calendar')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <span class="rail-label">Calendar</span>
+          </button>
+
+          <!-- Calls -->
+          <button class="rail-item" id="rail-btn-calls" onclick="switchRailTab('calls')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+            </svg>
+            <span class="rail-label">Calls</span>
+          </button>
+
+          <!-- Files -->
+          <button class="rail-item" id="rail-btn-files" onclick="switchRailTab('files')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+              <polyline points="13 2 13 9 20 9"></polyline>
+            </svg>
+            <span class="rail-label">Files</span>
+          </button>
+        </div>
+
+        <div class="rail-bottom">
+          <!-- Apps / Settings -->
+          <button class="rail-item" onclick="openProfileModal()" title="Settings & Account">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            <span class="rail-label">Settings</span>
+          </button>
+        </div>
+      </aside>
+
+      <!-- 2. Sub-Sidebar (Channels / Chat / Calendar / Calls list) -->
+      <section class="teams-sidebar">
+        
+        <div class="sidebar-header">
+          <span id="sidebar-section-title" class="sidebar-title">Teams</span>
+          <button class="icon-btn" onclick="handleNewChannelPrompt()" title="Create Channel or Start Chat">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div id="sidebar-scrollable-content" class="sidebar-content-scroll">
+          <!-- Dynamically populated based on active rail tab (Teams / Chat / Calendar / Calls) -->
+        </div>
+
+      </section>
+
+      <!-- 3. Center Main Workspace / Conversation Area -->
+      <main class="teams-main-workspace">
+        
+        <!-- Workspace Header (Channel / DM Name, Topic, Call buttons) -->
+        <header class="workspace-header">
+          <div class="workspace-header-title">
+            <span class="channel-hash" id="header-symbol">#</span>
+            <span class="header-name" id="current-conversation-title">general</span>
+            <span class="header-topic" id="current-conversation-desc">General team discussion and announcements</span>
+          </div>
+
+          <div class="workspace-header-actions">
+            <!-- Audio Call Button -->
+            <button class="call-action-btn" onclick="startCall(false)" title="Audio Call">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+              </svg>
+              <span>Call</span>
+            </button>
+
+            <!-- Video Call Button -->
+            <button class="call-action-btn" onclick="startCall(true)" title="Video Meeting">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+              </svg>
+              <span>Video</span>
+            </button>
+
+            <!-- Screen Share Button -->
+            <button class="icon-btn" onclick="startScreenShare()" title="Share Screen">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+              </svg>
+            </button>
+
+            <!-- Member List Info -->
+            <button class="icon-btn" onclick="toggleMembersList()" title="Conversation Members">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+              </svg>
+            </button>
+          </div>
+        </header>
+
+        <!-- Messages Thread -->
+        <div id="messages-container" class="messages-scroll-area">
+          <!-- Dynamic message items will render here -->
+        </div>
+
+        <!-- Typing Indicator -->
+        <div id="typing-indicator" class="hidden" style="padding: 0 24px 6px; font-size: 12px; color: var(--teams-purple-light); display: flex; align-items: center; gap: 6px;">
+          <span class="call-timer-dot"></span>
+          <span id="typing-text">Alex Rivera is typing...</span>
+        </div>
+
+        <!-- Message Composer Input -->
+        <div class="message-composer-wrap">
+          <div class="composer-box">
+            <!-- Formatting toolbar -->
+            <div class="composer-tools-top">
+              <button class="composer-tool-btn" onclick="insertFormatting('**', '**')" title="Bold"><strong>B</strong></button>
+              <button class="composer-tool-btn" onclick="insertFormatting('*', '*')" title="Italic"><em>I</em></button>
+              <button class="composer-tool-btn" onclick="insertFormatting('`', '`')" title="Code">&lt;/&gt;</button>
+              <button class="composer-tool-btn" onclick="insertFormatting('📢 Announcement: ', '')" title="Announcement">📢</button>
+              <button class="composer-tool-btn" onclick="insertEmoji('👍')" title="Thumbs Up">👍</button>
+              <button class="composer-tool-btn" onclick="insertEmoji('🚀')" title="Rocket">🚀</button>
+              <button class="composer-tool-btn" onclick="insertEmoji('🎉')" title="Celebrate">🎉</button>
+            </div>
+
+            <!-- Text input -->
+            <textarea 
+              id="message-input-field" 
+              class="composer-textarea" 
+              placeholder="Type a message (Press Enter to send, Shift+Enter for new line)..."
+              rows="2"
+              onkeydown="handleMessageKeydown(event)"
+            ></textarea>
+
+            <div class="composer-bottom-bar">
+              <div style="font-size: 11px; color: var(--text-muted);">
+                💡 Tip: Teammates will automatically reply to your messages!
+              </div>
+              <button class="send-msg-btn" onclick="sendMessage()">
+                <span>Send</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </main>
+
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       3. VIDEO CALL MODAL (MICROSOFT TEAMS MEETING EXPERIENCE)
+       ========================================================================= -->
+  <div id="call-modal" class="modal-overlay hidden">
+    <div class="call-modal-window">
+      <!-- Call Header -->
+      <div class="call-modal-header">
+        <div class="call-title-info">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="23 7 16 12 23 17 23 7"></polygon>
+            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+          </svg>
+          <span style="font-weight: 700; font-size: 15px;" id="call-modal-title">Engineering Sprint Standup</span>
+          <div class="call-timer-pill">
+            <span class="call-timer-dot"></span>
+            <span id="call-duration-timer">00:00</span>
+          </div>
+        </div>
+
+        <button class="icon-btn" onclick="endCall()" title="Leave Meeting">
+          ✕
+        </button>
+      </div>
+
+      <!-- Video Grid with Multiple Participants -->
+      <div class="call-video-grid" id="call-video-grid">
+        <!-- Self Video Tile (Supports real webcam or animated avatar) -->
+        <div class="video-tile active-speaker" id="self-video-tile">
+          <video id="self-webcam-video" autoplay playsinline muted class="hidden"></video>
+          <div class="video-tile-placeholder" id="self-video-placeholder">
+            <img id="call-self-avatar" src="" class="video-tile-avatar" />
+            <span style="font-size: 13px; font-weight: 600; color: #FFFFFF;" id="call-self-name">You</span>
+          </div>
+          <div class="video-tile-name">
+            <span>You (Organizer)</span>
+            <span id="call-self-mic-status">🎙️</span>
+          </div>
+        </div>
+
+        <!-- Colleague 1: Alex Rivera -->
+        <div class="video-tile">
+          <div class="video-tile-placeholder">
+            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&auto=format&fit=crop&q=80" class="video-tile-avatar" />
+            <span style="font-size: 13px; font-weight: 600; color: #FFFFFF;">Alex Rivera</span>
+          </div>
+          <div class="video-tile-name">
+            <span>Alex Rivera (Lead Architect)</span>
+            <span>🎙️</span>
+          </div>
+        </div>
+
+        <!-- Colleague 2: Sarah Chen -->
+        <div class="video-tile">
+          <div class="video-tile-placeholder">
+            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=160&auto=format&fit=crop&q=80" class="video-tile-avatar" />
+            <span style="font-size: 13px; font-weight: 600; color: #FFFFFF;">Sarah Chen</span>
+          </div>
+          <div class="video-tile-name">
+            <span>Sarah Chen (Product Manager)</span>
+            <span>🎙️</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Call Controls -->
+      <div class="call-controls-bar">
+        <!-- Toggle Camera -->
+        <button class="call-btn" id="call-btn-camera" onclick="toggleWebcam()" title="Toggle Camera">
+          📷
+        </button>
+
+        <!-- Toggle Microphone -->
+        <button class="call-btn btn-active-toggle" id="call-btn-mic" onclick="toggleMicrophone()" title="Mute/Unmute Mic">
+          🎙️
+        </button>
+
+        <!-- Share Screen -->
+        <button class="call-btn" id="call-btn-screenshare" onclick="toggleCallScreenShare()" title="Share Screen">
+          🖥️
+        </button>
+
+        <!-- In-Call Chat -->
+        <button class="call-btn" onclick="notifyToast('In-call chat active', 'info')" title="Chat">
+          💬
+        </button>
+
+        <!-- End Call Button -->
+        <button class="call-btn btn-end-call" onclick="endCall()" title="Leave Meeting">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.42 19.42 0 0 1-3.33-2.67m-2.67-3.34a19.79 19.79 0 0 1-3.07-8.63A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91"></path>
+            <line x1="23" y1="1" x2="1" y2="23"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       4. USER PROFILE & SECURITY MODAL
+       ========================================================================= -->
+  <div id="profile-modal" class="modal-overlay hidden" onclick="closeModalOnOverlay(event, 'profile-modal')">
+    <div class="modal-card">
+      <div class="modal-header-row">
+        <h3 style="font-size: 18px; font-weight: 700;">User Account & Security</h3>
+        <button class="icon-btn" onclick="closeProfileModal()">✕</button>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+        <img id="modal-user-avatar" src="" class="user-avatar" style="width: 56px; height: 56px;" />
+        <div>
+          <div id="modal-user-name" style="font-size: 16px; font-weight: 700; color: #FFFFFF;">Satya Nadella</div>
+          <div id="modal-user-email" style="font-size: 13px; color: var(--text-secondary);">satya@contoso.com</div>
+          <div id="modal-user-mobile" style="font-size: 13px; color: var(--text-muted);">+1 555-0199</div>
+        </div>
+      </div>
+
+      <!-- Security Status Badge -->
+      <div style="background: rgba(91, 95, 199, 0.15); border: 1px solid var(--teams-purple); border-radius: var(--radius-md); padding: 12px; margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #C8CAFA; margin-bottom: 4px;">
+          <span>🔑</span>
+          <span>Direct Password Login Active</span>
+        </div>
+        <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.4;">
+          Your account is fully verified. You can log in anytime using your Mobile Number or Email along with your Password. <strong>No OTP is required!</strong>
+        </p>
+      </div>
+
+      <!-- Status Picker -->
+      <div class="form-group">
+        <label class="form-label">Teams Presence Status</label>
+        <select id="user-status-select" class="form-input" onchange="updateUserPresence(this.value)">
+          <option value="Available">🟢 Available</option>
+          <option value="Busy">🔴 Busy</option>
+          <option value="Do Not Disturb">⛔ Do Not Disturb</option>
+          <option value="Away">🟡 Away / Be Right Back</option>
+        </select>
+      </div>
+
+      <!-- Sign Out Button -->
+      <button class="btn-teams-primary" style="background: var(--danger); margin-top: 10px;" onclick="handleSignOut()">
+        <span>Sign Out of Teams</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       5. FORGOT PASSWORD MODAL (USES OTP TO RESET)
+       ========================================================================= -->
+  <div id="forgot-password-modal" class="modal-overlay hidden" onclick="closeModalOnOverlay(event, 'forgot-password-modal')">
+    <div class="modal-card">
+      <div class="modal-header-row">
+        <h3 style="font-size: 18px; font-weight: 700;">Reset Password</h3>
+        <button class="icon-btn" onclick="closeForgotPasswordModal()">✕</button>
+      </div>
+
+      <div id="fp-step-1">
+        <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
+          Enter your registered email or mobile number to receive a one-time reset code:
+        </p>
+        <div class="form-group">
+          <input type="text" id="fp-identifier" class="form-input" placeholder="e.g. satya@contoso.com" />
+        </div>
+        <button class="btn-teams-primary" onclick="handleSendForgotOtp()">Send Reset OTP</button>
+      </div>
+
+      <div id="fp-step-2" class="hidden">
+        <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">
+          Enter the 6-digit OTP sent to your account and choose a new password:
+        </p>
+        <div class="form-group">
+          <label class="form-label">6-Digit OTP</label>
+          <input type="text" id="fp-otp" class="form-input" placeholder="e.g. 123456" maxlength="6" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">New Password</label>
+          <input type="password" id="fp-new-password" class="form-input" placeholder="At least 6 characters" />
+        </div>
+        <button class="btn-teams-primary" onclick="handleResetPasswordSubmit()">Save New Password</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
